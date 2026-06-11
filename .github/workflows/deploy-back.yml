@@ -60,17 +60,12 @@ jobs:
       - name: Actualizar BACKEND en EKS
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          EKS_NAMESPACE: ${{ secrets.EKS_NAMESPACE }}
         run: |
-          kubectl apply -f repo-infra/backend-deployment.yaml -n $EKS_NAMESPACE
-          kubectl apply -f repo-infra/backend-service.yaml -n $EKS_NAMESPACE
-          kubectl set image deployment/tienda-backend \
-            backend=$ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG} \
-            -n $EKS_NAMESPACE
-          kubectl rollout status deployment/tienda-backend -n $EKS_NAMESPACE
+          kubectl apply -f repo-infra/backend-deployment.yaml
+          kubectl apply -f repo-infra/backend-service.yaml
+          kubectl set image deployment/tienda-backend backend=$ECR_REGISTRY/${ECR_REPO_BACKEND}:${IMAGE_TAG} -n tienda
+          kubectl rollout status deployment/tienda-backend -n tienda
 
       - name: Aplicar HPA Backend (opcional)
-        env:
-          EKS_NAMESPACE: ${{ secrets.EKS_NAMESPACE }}
         run: |
-          if [ -f repo-infra/backend-hpa.yaml ]; then kubectl apply -f repo-infra/backend-hpa.yaml -n $EKS_NAMESPACE; fi
+          if [ -f repo-infra/backend-hpa.yaml ]; then kubectl apply -f repo-infra/backend-hpa.yaml; fi
